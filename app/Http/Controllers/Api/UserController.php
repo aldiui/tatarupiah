@@ -46,8 +46,8 @@ class UserController extends Controller
         }
 
         $user = auth()->user();
-        if ($user->image != 'default.png' && Storage::exists('public/users/' . $user->image)) {
-            Storage::delete('public/users/' . $user->image);
+        if (basename($user->image) != 'default.png' && Storage::exists('public/users/' . basename($user->image))) {
+            Storage::delete('public/users/' . basename($user->image));
         }
         $image = $request->file('image')->hashName();
         $request->file('image')->storeAs('public/users', $image);
