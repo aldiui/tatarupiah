@@ -24,7 +24,7 @@ class DatabaseSeeder extends Seeder
             ],
             [
                 'nama' => 'Ichayuli',
-                'email' => 'ichayului@gmail.com',
+                'email' => 'ichayuliarahma81@gmail.com',
                 'password' => '11221122',
                 'role' => 'admin',
             ],
