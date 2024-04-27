@@ -12,7 +12,7 @@ Route::get('/', function () {
 
 Route::get('/dashboard', function () {
     $data = [
-        'user' => User::count(),
+        'user' => User::whereRole('user')->count(),
     ];
     return Inertia::render('Dashboard', compact('data'));
 })->middleware(['auth', 'verified'])->name('dashboard');
