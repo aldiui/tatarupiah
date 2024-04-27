@@ -35,6 +35,11 @@ class KategoriController extends Controller
 
         $user = auth()->user();
 
+        $cekKategori = Kategori::where('user_id', $user->id)->where('nama', $request->nama)->first();
+        if ($cekKategori) {
+            return $this->errorResponse(null, 'Kategori sudah ada.', 409);
+        }
+
         $kategori = Kategori::create([
             'user_id' => $user->id,
             'nama' => $request->nama,
@@ -68,6 +73,14 @@ class KategoriController extends Controller
 
         if (!$kategori) {
             return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
+        }
+
+        if ($kategori->nama != $request->nama) {
+            $cekKategori = Kategori::where('user_id', $kategori->user_id)->where('id', '!=', $id)->where('nama', $request->nama)->first();
+
+            if ($cekKategori) {
+                return $this->errorResponse(null, 'Kategori sudah ada.', 409);
+            }
         }
 
         $kategori->update($request->only('nama'));
