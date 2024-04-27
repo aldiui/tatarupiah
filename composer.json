@@ -9,6 +9,7 @@
         "inertiajs/inertia-laravel": "^1.0",
         "laravel/framework": "^11.0",
         "laravel/sanctum": "^4.0",
+        "laravel/scout": "^10.8",
         "laravel/tinker": "^2.9",
         "php-open-source-saver/jwt-auth": "^2.2",
         "tightenco/ziggy": "^2.0"

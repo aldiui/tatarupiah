@@ -7,11 +7,12 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Laravel\Scout\Searchable;
 use PHPOpenSourceSaver\JWTAuth\Contracts\JWTSubject;
 
 class User extends Authenticatable implements JWTSubject
 {
-    use HasFactory, Notifiable;
+    use HasFactory, Notifiable, Searchable;
 
     /**
      * The attributes that are mass assignable.
@@ -59,4 +60,13 @@ class User extends Authenticatable implements JWTSubject
             get: fn($image) => url('/storage/users/' . $image),
         );
     }
+
+    public function toSearchableArray(): array
+    {
+        return [
+            'nama' => $this->nama,
+            'email' => $this->email,
+        ];
+    }
+
 }

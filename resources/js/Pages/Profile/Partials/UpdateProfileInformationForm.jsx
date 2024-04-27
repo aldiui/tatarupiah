@@ -37,36 +37,38 @@ export default function UpdateProfileInformation({
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-6">
-                <div>
-                    <InputLabel htmlFor="nama" value="Nama" />
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                    <div>
+                        <InputLabel htmlFor="nama" value="Nama" />
 
-                    <TextInput
-                        id="nama"
-                        className="mt-1 block w-full"
-                        value={data.nama}
-                        onChange={(e) => setData("nama", e.target.value)}
-                        required
-                        isFocused
-                        autoComplete="nama"
-                    />
+                        <TextInput
+                            id="nama"
+                            className="mt-1 block w-full"
+                            value={data.nama}
+                            onChange={(e) => setData("nama", e.target.value)}
+                            required
+                            isFocused
+                            autoComplete="nama"
+                        />
 
-                    <InputError className="mt-2" message={errors.nama} />
-                </div>
+                        <InputError className="mt-2" message={errors.nama} />
+                    </div>
 
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <div>
+                        <InputLabel htmlFor="email" value="Email" />
 
-                    <TextInput
-                        id="email"
-                        type="email"
-                        className="mt-1 block w-full"
-                        value={data.email}
-                        onChange={(e) => setData("email", e.target.value)}
-                        required
-                        autoComplete="username"
-                    />
+                        <TextInput
+                            id="email"
+                            type="email"
+                            className="mt-1 block w-full"
+                            value={data.email}
+                            onChange={(e) => setData("email", e.target.value)}
+                            required
+                            autoComplete="username"
+                        />
 
-                    <InputError className="mt-2" message={errors.email} />
+                        <InputError className="mt-2" message={errors.email} />
+                    </div>
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (

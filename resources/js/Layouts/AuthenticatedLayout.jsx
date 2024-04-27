@@ -1,13 +1,38 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ApplicationLogo from "@/Components/ApplicationLogo";
 import Dropdown from "@/Components/Dropdown";
 import NavLink from "@/Components/NavLink";
 import ResponsiveNavLink from "@/Components/ResponsiveNavLink";
 import { Link } from "@inertiajs/react";
+import toast, { Toaster } from "react-hot-toast";
 
-export default function Authenticated({ user, header, children }) {
+export default function Authenticated({ user, header, children, sessions }) {
     const [showingNavigationDropdown, setShowingNavigationDropdown] =
         useState(false);
+
+    const menu = [
+        {
+            name: "Dashboard",
+            href: route("dashboard"),
+            current: route().current("dashboard"),
+        },
+        {
+            name: "User",
+            href: route("user.index"),
+            current: route().current("user.*"),
+        },
+    ];
+
+    const [sessionSuccess, setSessionSuccess] = useState(null);
+
+    useEffect(() => {
+        const { success } = sessions || {};
+        setSessionSuccess(success);
+    }, [sessions]);
+
+    useEffect(() => {
+        sessionSuccess && toast.success(sessionSuccess);
+    }, [sessionSuccess]);
 
     return (
         <div className="min-h-screen bg-gray-100">
@@ -22,12 +47,15 @@ export default function Authenticated({ user, header, children }) {
                             </div>
 
                             <div className="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                                <NavLink
-                                    href={route("dashboard")}
-                                    active={route().current("dashboard")}
-                                >
-                                    Dashboard
-                                </NavLink>
+                                {menu.map((item, index) => (
+                                    <NavLink
+                                        key={index}
+                                        href={item.href}
+                                        active={item.current}
+                                    >
+                                        {item.name}
+                                    </NavLink>
+                                ))}
                             </div>
                         </div>
 
@@ -126,12 +154,15 @@ export default function Authenticated({ user, header, children }) {
                     }
                 >
                     <div className="pt-2 pb-3 space-y-1">
-                        <ResponsiveNavLink
-                            href={route("dashboard")}
-                            active={route().current("dashboard")}
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        {menu.map((item, index) => (
+                            <ResponsiveNavLink
+                                key={index}
+                                href={item.href}
+                                active={item.current}
+                            >
+                                {item.name}
+                            </ResponsiveNavLink>
+                        ))}
                     </div>
 
                     <div className="pt-4 pb-1 border-t border-gray-200">
@@ -168,7 +199,11 @@ export default function Authenticated({ user, header, children }) {
                 </header>
             )}
 
-            <main>{children}</main>
+            <main>
+                <Toaster position="top-right" />
+
+                {children}
+            </main>
         </div>
     );
 }

@@ -19,10 +19,9 @@ class DecryptToken
             try {
                 $decryptedToken = Crypt::decrypt($encryptedToken);
                 $user = JWTAuth::setToken($decryptedToken)->authenticate();
-                if (!$user) {
+                if (!$user || !$user->id) {
                     return $this->errorResponse(null, 'Sesi Anda telah berakhir. silahkan login kembali.', 401);
                 }
-                App::setLocale($user->lang);
                 $request->merge(['user' => $user]);
 
             } catch (\Exception $e) {
