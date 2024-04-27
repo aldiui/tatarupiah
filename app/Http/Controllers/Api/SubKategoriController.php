@@ -14,7 +14,7 @@ class SubKategoriController extends Controller
 
     public function index()
     {
-        $subCategories = SubKategori::whereHas('kategori', function ($categoryQuery) {
+        $subKategories = SubKategori::whereHas('kategori', function ($categoryQuery) {
             $categoryQuery->where('user_id', auth()->id());
         })->get();
 
@@ -22,7 +22,7 @@ class SubKategoriController extends Controller
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        return $this->successResponse($user, 'Sub Kategori telah berhasil diambil.');
+        return $this->successResponse($subKategories, 'Sub Kategori telah berhasil diambil.');
     }
 
     public function store(Request $request)
@@ -62,7 +62,7 @@ class SubKategoriController extends Controller
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        return $this->successResponse($subCategori, 'Sub Kategori telah berhasil diambil.');
+        return $this->successResponse($subKategori, 'Sub Kategori telah berhasil diambil.');
     }
 
     public function update(Request $request, $id)

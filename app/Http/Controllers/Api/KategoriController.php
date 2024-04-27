@@ -20,7 +20,7 @@ class KategoriController extends Controller
             return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
         }
 
-        return $this->successResponse($user, 'Kategori telah berhasil diambil.');
+        return $this->successResponse($kategoris, 'Kategori telah berhasil diambil.');
     }
 
     public function store(Request $request)
@@ -40,7 +40,7 @@ class KategoriController extends Controller
             'nama' => $request->nama,
         ]);
 
-        return $this->successResponse($user, 'Kategori telah berhasil ditambahkan.');
+        return $this->successResponse($kategori, 'Kategori telah berhasil ditambahkan.');
     }
 
     public function show($id)
@@ -51,7 +51,7 @@ class KategoriController extends Controller
             return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
         }
 
-        return $this->successResponse($user, 'Kategori telah berhasil diambil.');
+        return $this->successResponse($kategori, 'Kategori telah berhasil diambil.');
     }
 
     public function update(Request $request, $id)
@@ -72,7 +72,7 @@ class KategoriController extends Controller
 
         $kategori->update($request->only('nama'));
 
-        return $this->successResponse($user, 'Kategori telah berhasil diperbarui.');
+        return $this->successResponse($kategori, 'Kategori telah berhasil diperbarui.');
     }
 
     public function destroy($id)
