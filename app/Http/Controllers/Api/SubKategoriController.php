@@ -14,15 +14,15 @@ class SubKategoriController extends Controller
 
     public function index()
     {
-        $subKategories = SubKategori::whereHas('kategori', function ($categoryQuery) {
+        $subKategoris = SubKategori::whereHas('kategori', function ($categoryQuery) {
             $categoryQuery->where('user_id', auth()->id());
         })->get();
 
-        if (!$subKategories) {
+        if (!$subKategoris) {
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        return $this->successResponse($subKategories, 'Sub Kategori telah berhasil diambil.');
+        return $this->successResponse($subKategoris, 'Sub Kategori telah berhasil diambil.');
     }
 
     public function store(Request $request)
