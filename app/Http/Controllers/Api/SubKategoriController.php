@@ -18,7 +18,7 @@ class SubKategoriController extends Controller
             $categoryQuery->where('user_id', auth()->id());
         })->get();
 
-        if (!$subKategoris) {
+        if (!$subKategories) {
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
