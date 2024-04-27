@@ -40,13 +40,21 @@ class SubKategoriController extends Controller
             return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
         }
 
+        $cekSubKategori = SubKategori::whereHas('kategori', function ($categoryQuery) {
+            $categoryQuery->where('user_id', auth()->id());
+        })->where('nama', $request->nama)->first();
+
+        if ($cekSubKategori) {
+            return $this->errorResponse(null, 'Sub Kategori sudah ada.', 409);
+        }
+
         $subKategori = SubKategori::create([
             'kategori_id' => $request->kategori_id,
             'nama' => $request->nama,
             'icon' => $request->icon,
             'type' => $request->type,
             'harga_pokok' => $request->harga_pokok,
-            'harga_jual' => $request->harga_jual ? $request->harga_jual : 0,
+            'harga_jual' => $request->type == 'Pemasukan' ? $request->harga_jual : 0,
         ]);
 
         return $this->successResponse($subKategori, 'Sub Kategori telah berhasil ditambahkan.');
@@ -87,6 +95,16 @@ class SubKategoriController extends Controller
         if (!$subKategori) {
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
+
+        $cekSubKategori = SubKategori::whereHas('kategori', function ($categoryQuery) {
+            $categoryQuery->where('user_id', auth()->id());
+        })->where('id', '!=', $id)->where('nama', $request->nama)->first();
+
+        if ($cekSubKategori) {
+            return $this->errorResponse(null, 'Sub Kategori sudah ada.', 409);
+        }
+
+        $request->type == 'Pemasukan' ? $request->merge(['harga_jual' => $request->harga_jual]) : $request->merge(['harga_jual' => 0]);
 
         $subKategori->update($request->only('nama', 'icon', 'type', 'harga_pokok', 'harga_jual'));
 
