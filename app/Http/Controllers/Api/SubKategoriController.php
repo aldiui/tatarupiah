@@ -96,14 +96,6 @@ class SubKategoriController extends Controller
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        $cekSubKategori = SubKategori::whereHas('kategori', function ($categoryQuery) {
-            $categoryQuery->where('user_id', auth()->id());
-        })->where('id', '!=', $id)->where('nama', $request->nama)->first();
-
-        if ($cekSubKategori) {
-            return $this->errorResponse(null, 'Sub Kategori sudah ada.', 409);
-        }
-
         $request->type == 'Pemasukan' ? $request->merge(['harga_jual' => $request->harga_jual]) : $request->merge(['harga_jual' => 0]);
 
         $subKategori->update($request->only('nama', 'icon', 'type', 'harga_pokok', 'harga_jual'));
