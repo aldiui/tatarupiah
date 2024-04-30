@@ -30,6 +30,7 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+        'email_verified_at',
     ];
 
     /**
@@ -73,5 +74,16 @@ class User extends Authenticatable implements JWTSubject
     public function kategoris()
     {
         return $this->hasMany(Kategori::class);
+    }
+
+    public function toArray()
+    {
+        $array = parent::toArray();
+
+        $array['nama_toko'] = $array['nama_toko'] ?? '';
+        $array['no_handphone'] = $array['no_handphone'] ?? '';
+        $array['alamat'] = $array['alamat'] ?? '';
+
+        return $array;
     }
 }
