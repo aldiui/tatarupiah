@@ -20,13 +20,13 @@ class UserController extends Controller
             ->appends('query', null)
             ->withQueryString();
 
-        return Inertia::render('Users/Index', compact('users'));
+        return Inertia::render('User/Index', compact('users'));
     }
 
     public function edit($id)
     {
         $user = User::whereRole('user')->findOrFail($id);
-        return Inertia::render('Users/Edit', ['user' => $user]);
+        return Inertia::render('User/Edit', ['user' => $user]);
     }
 
     public function update(Request $request, $id)
