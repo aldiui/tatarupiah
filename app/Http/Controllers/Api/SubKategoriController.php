@@ -114,7 +114,6 @@ class SubKategoriController extends Controller
         }
 
         $subKategori->delete();
-
         return $this->successResponse(null, 'Sub Kategori telah berhasil di hapus.');
     }
 }
