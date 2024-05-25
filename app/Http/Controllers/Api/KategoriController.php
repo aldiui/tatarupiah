@@ -14,7 +14,7 @@ class KategoriController extends Controller
 
     public function index()
     {
-        $kategoris = Kategori::where('user_id', auth()->user()->id)->get();
+        $kategoris = Kategori::with('subKategoris')->where('user_id', auth()->user()->id)->get();
 
         if (!$kategoris) {
             return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
