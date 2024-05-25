@@ -27,6 +27,7 @@ class KategoriController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required',
+            'type' => 'required|in:Pemasukan,Pengeluaran',
         ]);
 
         if ($validator->fails()) {
@@ -34,16 +35,12 @@ class KategoriController extends Controller
         }
 
         $user = auth()->user();
-
-        $cekKategori = Kategori::where('user_id', $user->id)->where('nama', $request->nama)->first();
+        $cekKategori = $user->kategoris()->where('nama', $request->nama)->first();
         if ($cekKategori) {
             return $this->errorResponse(null, 'Kategori sudah ada.', 409);
         }
 
-        $kategori = Kategori::create([
-            'user_id' => $user->id,
-            'nama' => $request->nama,
-        ]);
+        $kategori = $user->kategoris()->create($request->only('nama', 'type'));
 
         return $this->successResponse($kategori, 'Kategori telah berhasil ditambahkan.');
     }
@@ -63,13 +60,15 @@ class KategoriController extends Controller
     {
         $validator = Validator::make($request->all(), [
             'nama' => 'required',
+            'type' => 'required|in:Pemasukan,Pengeluaran',
         ]);
 
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
         }
 
-        $kategori = Kategori::where('user_id', auth()->user()->id)->find($id);
+        $user = auth()->user();
+        $kategori = $user->kategoris()->find($id);
 
         if (!$kategori) {
             return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
@@ -81,7 +80,7 @@ class KategoriController extends Controller
             return $this->errorResponse(null, 'Kategori sudah ada.', 409);
         }
 
-        $kategori->update($request->only('nama'));
+        $kategori->update($request->only('nama', 'type'));
 
         return $this->successResponse($kategori, 'Kategori telah berhasil diperbarui.');
     }

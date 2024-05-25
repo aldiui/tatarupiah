@@ -16,7 +16,6 @@ return new class extends Migration
             $table->unsignedBigInteger('kategori_id');
             $table->string('nama');
             $table->string('icon');
-            $table->enum('type', ['Pemasukan', 'Pengeluaran'])->default('Pemasukan');
             $table->unsignedBigInteger('harga_pokok')->default(0);
             $table->unsignedBigInteger('harga_jual')->default(0);
             $table->timestamps();

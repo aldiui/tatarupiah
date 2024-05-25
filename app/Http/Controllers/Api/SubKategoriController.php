@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\Kategori;
 use App\Models\SubKategori;
 use App\Traits\ApiResponder;
 use Illuminate\Http\Request;
@@ -27,13 +28,20 @@ class SubKategoriController extends Controller
 
     public function store(Request $request)
     {
+        $kategori = Kategori::where('user_id', auth()->id())->find($request->kategori_id);
+
         $validator = Validator::make($request->all(), [
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required',
             'icon' => 'required',
-            'type' => 'required|in:Pemasukan,Pengeluaran',
             'harga_pokok' => 'required|numeric',
-            'harga_jual' => 'required_if:type,Pemasukan|numeric',
+            'harga_jual' => ['nullable', 'numeric', function ($attribute, $value, $fail) use ($kategori) {
+                if ($kategori && $kategori->type === 'Pemasukan' && $value === null) {
+                    $fail('Harga jual wajib diisi jika tipe kategori adalah Pemasukan.');
+                } elseif ($kategori && $kategori->type !== 'Pemasukan' && $value !== null) {
+                    $fail('Harga jual hanya dapat diisi jika tipe kategori adalah Pemasukan.');
+                }
+            }],
         ]);
 
         if ($validator->fails()) {
@@ -52,9 +60,8 @@ class SubKategoriController extends Controller
             'kategori_id' => $request->kategori_id,
             'nama' => $request->nama,
             'icon' => $request->icon,
-            'type' => $request->type,
             'harga_pokok' => $request->harga_pokok,
-            'harga_jual' => $request->type == 'Pemasukan' ? $request->harga_jual : 0,
+            'harga_jual' => $kategori->type == 'Pemasukan' ? $request->harga_jual : 0,
         ]);
 
         return $this->successResponse($subKategori, 'Sub Kategori telah berhasil ditambahkan.');
@@ -75,18 +82,26 @@ class SubKategoriController extends Controller
 
     public function update(Request $request, $id)
     {
+        $kategori = Kategori::where('user_id', auth()->id())->find($request->kategori_id);
         $validator = Validator::make($request->all(), [
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required',
             'icon' => 'required',
-            'type' => 'required|in:Pemasukan,Pengeluaran',
             'harga_pokok' => 'required|numeric',
-            'harga_jual' => 'required_if:type,Pemasukan|numeric',
+            'harga_jual' => ['nullable', 'numeric', function ($attribute, $value, $fail) use ($kategori) {
+                if ($kategori && $kategori->type === 'Pemasukan' && $value === null) {
+                    $fail('Harga jual wajib diisi jika tipe kategori adalah Pemasukan.');
+                } elseif ($kategori && $kategori->type !== 'Pemasukan' && $value !== null) {
+                    $fail('Harga jual hanya dapat diisi jika tipe kategori adalah Pemasukan.');
+                }
+            }],
         ]);
 
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
         }
+
+        $kategori = Kategori::where('user_id', auth()->id())->find($request->kategori_id);
 
         $subKategori = SubKategori::whereHas('kategori', function ($categoryQuery) {
             $categoryQuery->where('user_id', auth()->id());
@@ -96,7 +111,7 @@ class SubKategoriController extends Controller
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        $request->type == 'Pemasukan' ? $request->merge(['harga_jual' => $request->harga_jual]) : $request->merge(['harga_jual' => 0]);
+        $kategori->type == 'Pemasukan' ? $request->merge(['harga_jual' => $request->harga_jual]) : $request->merge(['harga_jual' => 0]);
 
         $subKategori->update($request->only('nama', 'icon', 'type', 'harga_pokok', 'harga_jual'));
 
