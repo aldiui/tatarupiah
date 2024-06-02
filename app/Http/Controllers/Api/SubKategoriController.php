@@ -35,13 +35,7 @@ class SubKategoriController extends Controller
             'nama' => 'required',
             'icon' => 'required',
             'harga_pokok' => 'required|numeric',
-            'harga_jual' => ['nullable', 'numeric', function ($attribute, $value, $fail) use ($kategori) {
-                if ($kategori && $kategori->type === 'Pemasukan' && $value === null) {
-                    $fail('Harga jual wajib diisi jika tipe kategori adalah Pemasukan.');
-                } elseif ($kategori && $kategori->type !== 'Pemasukan' && $value !== null) {
-                    $fail('Harga jual hanya dapat diisi jika tipe kategori adalah Pemasukan.');
-                }
-            }],
+            'harga_jual' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -88,13 +82,7 @@ class SubKategoriController extends Controller
             'nama' => 'required',
             'icon' => 'required',
             'harga_pokok' => 'required|numeric',
-            'harga_jual' => ['nullable', 'numeric', function ($attribute, $value, $fail) use ($kategori) {
-                if ($kategori && $kategori->type === 'Pemasukan' && $value === null) {
-                    $fail('Harga jual wajib diisi jika tipe kategori adalah Pemasukan.');
-                } elseif ($kategori && $kategori->type !== 'Pemasukan' && $value !== null) {
-                    $fail('Harga jual hanya dapat diisi jika tipe kategori adalah Pemasukan.');
-                }
-            }],
+            'harga_jual' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
