@@ -14,15 +14,32 @@ class TransactionController extends Controller
 
     public function index(Request $request)
     {
-        $user = auth()->user();
+        $userTransactions = Transaction::where('user_id', auth()->user()->id);
 
-        $custom = [
-            "pemasukan_normal" => $user->transactions()->where('type', 'Pemasukan')->where('mode', 'Normal')->get(),
-            "pemasukan_kasir" => $user->transactions()->where('type', 'Pemasukan')->where('mode', 'Kasir')->get(),
-            "pengeluaran" => $user->transactions()->where('type', 'Pengeluaran')->get(),
+        if ($request->has(['mode', 'tanggal'])) {
+            $mode = $request->input('mode');
+            $tanggal = $request->input('tanggal');
+
+            if ($mode == 'pengeluaran') {
+                $transactions = $userTransactions->where('type', 'Pengeluaran')->where('tanggal', $tanggal)->get();
+            } elseif ($mode == 'pemasukan_normal') {
+                $transactions = $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->where('tanggal', $tanggal)->get();
+            } elseif ($mode == 'pemasukan_kasir') {
+                $transactions = $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->where('tanggal', $tanggal)->get();
+            } else {
+                $transactions = null;
+            }
+
+            return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
+        }
+
+        $transactions = [
+            'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->get(),
+            'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->get(),
+            'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->get(),
         ];
 
-        return $this->successResponse($custom, 'Transaksi telah berhasil diambil.');
+        return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
     }
 
     public function store(Request $request)
