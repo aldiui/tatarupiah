@@ -16,4 +16,8 @@ class SubKategori extends Model
         return $this->belongsTo(Kategori::class);
     }
 
+    public function transactions()
+    {
+        return $this->hasMany(Transaction::class);
+    }
 }

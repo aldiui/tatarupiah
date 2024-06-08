@@ -28,18 +28,22 @@ class SubKategoriController extends Controller
 
     public function store(Request $request)
     {
-        $kategori = Kategori::where('user_id', auth()->id())->find($request->kategori_id);
-
         $validator = Validator::make($request->all(), [
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required',
             'icon' => 'required',
-            'harga_pokok' => 'required|numeric',
-            'harga_jual' => 'required|numeric',
+            'nominal_penjualan' => 'required|numeric',
+            'nominal_pengeluaran' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
             return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
+        }
+
+        $kategori = Kategori::where('user_id', auth()->id())->where('id', $request->kategori_id)->first();
+
+        if (!$kategori) {
+            return $this->errorResponse(null, 'Kategori tidak ditemukan.', 404);
         }
 
         $cekSubKategori = SubKategori::whereHas('kategori', function ($categoryQuery) {
@@ -54,8 +58,8 @@ class SubKategoriController extends Controller
             'kategori_id' => $request->kategori_id,
             'nama' => $request->nama,
             'icon' => $request->icon,
-            'harga_pokok' => $request->harga_pokok,
-            'harga_jual' => $kategori->type == 'Pemasukan' ? $request->harga_jual : 0,
+            'nominal_penjualan' => $request->nominal_penjualan ?? 0,
+            'nominal_pengeluaran' => $request->nominal_pengeluaran ?? 0,
         ]);
 
         return $this->successResponse($subKategori, 'Sub Kategori telah berhasil ditambahkan.');
@@ -81,8 +85,8 @@ class SubKategoriController extends Controller
             'kategori_id' => 'required|exists:kategoris,id',
             'nama' => 'required',
             'icon' => 'required',
-            'harga_pokok' => 'required|numeric',
-            'harga_jual' => 'required|numeric',
+            'nominal_penjualan' => 'required|numeric',
+            'nominal_pengeluaran' => 'required|numeric',
         ]);
 
         if ($validator->fails()) {
@@ -99,9 +103,7 @@ class SubKategoriController extends Controller
             return $this->errorResponse(null, 'Sub Kategori tidak ditemukan.', 404);
         }
 
-        $kategori->type == 'Pemasukan' ? $request->merge(['harga_jual' => $request->harga_jual]) : $request->merge(['harga_jual' => 0]);
-
-        $subKategori->update($request->only('nama', 'icon', 'type', 'harga_pokok', 'harga_jual'));
+        $subKategori->update($request->only('nama', 'icon', 'type', 'nominal_penjualan', 'nominal_pengeluaran'));
 
         return $this->successResponse($subKategori, 'Sub Kategori telah berhasil diperbarui.');
     }

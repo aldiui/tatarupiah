@@ -22,4 +22,8 @@ class Kategori extends Model
         return $this->belongsTo(User::class);
     }
 
+    protected $hidden = [
+        'user_id',
+    ];
+
 }
