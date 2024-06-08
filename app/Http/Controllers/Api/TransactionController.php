@@ -16,21 +16,22 @@ class TransactionController extends Controller
     {
         $userTransactions = Transaction::where('user_id', auth()->user()->id);
 
-        if ($request->has(['mode', 'tanggal'])) {
-            $mode = $request->input('mode');
-            $tanggal = $request->input('tanggal');
-
-            if ($mode == 'pengeluaran') {
-                $transactions = $userTransactions->where('type', 'Pengeluaran')->where('tanggal', $tanggal)->get();
-            } elseif ($mode == 'pemasukan_normal') {
-                $transactions = $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->where('tanggal', $tanggal)->get();
-            } elseif ($mode == 'pemasukan_kasir') {
-                $transactions = $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->where('tanggal', $tanggal)->get();
-            } else {
-                $transactions = null;
+        if ($request->has(['tanggal_mulai', 'tanggal_selesai'])) {
+            if ($request->has('tanggal_mulai') && $request->has('tanggal_selesai')) {
+                $custom = [
+                    'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
+                    'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
+                    'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
+                ];
+            } elseif ($request->has('tanggal_mulai')) {
+                $custom = [
+                    'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->where('tanggal', $request->tanggal_mulai)->get(),
+                    'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->where('tanggal', $request->tanggal_mulai)->get(),
+                    'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->where('tanggal', $request->tanggal_mulai)->get(),
+                ];
             }
 
-            return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
+            return $this->successResponse($custom ?? null, 'Transaksi berhasil diambil.');
         }
 
         $transactions = [
