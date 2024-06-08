@@ -18,28 +18,15 @@ class TransactionController extends Controller
 
         if ($request->has(['tanggal_mulai', 'tanggal_selesai'])) {
             if ($request->has('tanggal_mulai') && $request->has('tanggal_selesai')) {
-                $custom = [
-                    'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
-                    'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
-                    'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get(),
-                ];
+                $transactions = $userTransactions->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get();
             } elseif ($request->has('tanggal_mulai')) {
-                $custom = [
-                    'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->where('tanggal', $request->tanggal_mulai)->get(),
-                    'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->where('tanggal', $request->tanggal_mulai)->get(),
-                    'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->where('tanggal', $request->tanggal_mulai)->get(),
-                ];
+                $transactions = $userTransactions->where('tanggal', $request->tanggal_mulai)->get();
             }
 
-            return $this->successResponse($custom ?? null, 'Transaksi berhasil diambil.');
+            return $this->successResponse($transactions ?? null, 'Transaksi berhasil diambil.');
         }
 
-        $transactions = [
-            'pemasukan_normal' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Normal')->get(),
-            'pemasukan_kasir' => $userTransactions->where('type', 'Pemasukan')->where('mode', 'Kasir')->get(),
-            'pengeluaran' => $userTransactions->where('type', 'Pengeluaran')->get(),
-        ];
-
+        $transactions = Transaction::where('user_id', auth()->user()->id)->get();
         return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
     }
 
@@ -65,6 +52,7 @@ class TransactionController extends Controller
             'qty' => $request->qty ?? 0,
             'catatan' => $request->catatan,
             'tanggal' => $request->tanggal,
+            'pembayaran' => $request->pembayaran,
         ]);
 
         return $this->successResponse($transaksi, 'Transaksi telah berhasil ditambahkan.');
@@ -78,6 +66,7 @@ class TransactionController extends Controller
             'type' => 'required|in:Pemasukan,Pengeluaran',
             'mode' => 'required|in:Normal,Kasir',
             'catatan' => 'nullable',
+            'pembayaran' => 'required',
         ];
 
         $specificRules = [];
@@ -114,36 +103,6 @@ class TransactionController extends Controller
         }
 
         return $this->successResponse($transaksi, 'Transaksi telah berhasil diambil.');
-    }
-
-    public function update(Request $request, $id)
-    {
-        $transaksi = Transaction::where('user_id', auth()->id())->find($id);
-
-        if (!$transaksi) {
-            return $this->errorResponse(null, 'Transaksi tidak ditemukan.', 404);
-        }
-
-        $rules = $this->getValidationRules($request->type, $request->mode);
-
-        $validator = Validator::make($request->all(), $rules);
-
-        if ($validator->fails()) {
-            return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
-        }
-
-        $transaksi->update([
-            'sub_kategori_id' => $request->sub_kategori_id,
-            'type' => $request->type,
-            'mode' => $request->mode,
-            'nominal_penjualan' => $request->nominal_penjualan ?? 0,
-            'nominal_pengeluaran' => $request->nominal_pengeluaran ?? 0,
-            'qty' => $request->qty ?? 0,
-            'catatan' => $request->catatan,
-            'tanggal' => $request->tanggal,
-        ]);
-
-        return $this->successResponse($transaksi, 'Transaksi telah berhasil diubah.');
     }
 
     public function destroy($id)
