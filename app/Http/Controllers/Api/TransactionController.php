@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Controllers\Controller;
 use App\Models\Transaction;
 use App\Traits\ApiResponder;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 
@@ -116,4 +117,56 @@ class TransactionController extends Controller
         $transaksi->delete();
         return $this->successResponse(null, 'Transaksi telah berhasil dihapus.');
     }
+
+    public function barChart(Request $request)
+    {
+        $type = $request->input('type');
+        $tanggal = $request->input('date');
+
+        if (!$type || !$tanggal) {
+            return $this->errorResponse(null, 'Data transaksi bar chart tidak valid.', 422);
+        }
+
+        try {
+            $endDate = Carbon::parse($tanggal);
+            $startDate = $endDate->copy()->subDays(6);
+
+            $transactions = Transaction::whereBetween('tanggal', [$startDate, $endDate])
+                ->selectRaw('DATE(tanggal) as date, SUM(nominal_penjualan) as total_pemasukan, SUM(nominal_pengeluaran) as total_pengeluaran')
+                ->groupBy('date')
+                ->orderBy('date')
+                ->get();
+
+            $data = $transactions->map(function ($item) use ($type) {
+                $amount = 0;
+                switch ($type) {
+                    case 'Pemasukan':
+                        $amount = $item->total_pemasukan;
+                        break;
+                    case 'Pengeluaran':
+                        $amount = $item->total_pengeluaran;
+                        break;
+                    case 'Keuntungan':
+                        $amount = $item->total_pemasukan - $item->total_pengeluaran;
+                        break;
+                }
+                return [
+                    'date' => $item->date,
+                    'amount' => (int) $amount,
+                ];
+            });
+
+            $result = collect();
+            for ($date = $startDate->copy(); $date <= $endDate; $date->addDay()) {
+                $dateString = $date->format('Y-m-d');
+                $amount = $data->firstWhere('date', $dateString)['amount'] ?? 0;
+                $result->push(['date' => $dateString, 'amount' => $amount]);
+            }
+
+            return $this->successResponse($result, 'Data transaksi bar chart telah berhasil diambil.');
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, 'Terjadi kesalahan dalam pengambilan data: ' . $e->getMessage(), 500);
+        }
+    }
+
 }

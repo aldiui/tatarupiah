@@ -22,6 +22,7 @@ return new class extends Migration
             $table->text('catatan')->nullable();
             $table->enum('type', ['Pemasukan', 'Pengeluaran'])->default('Pemasukan');
             $table->enum('mode', ['Kasir', 'Normal'])->default('Normal');
+            $table->string('pembayaran');
             $table->timestamps();
 
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
