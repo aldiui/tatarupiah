@@ -16,6 +16,7 @@ Route::middleware(['decrypt.token'])->group(function () {
     Route::post('user/image', [UserController::class, 'updateImage']);
     Route::put('user/password', [UserController::class, 'updatePassword']);
     Route::get('transaction/bar-chart', [TransactionController::class, 'barChart']);
+    Route::get('transaction/multiple-chart', [TransactionController::class, 'multipleChart']);
     Route::apiResource('kategori', KategoriController::class);
     Route::apiResource('sub-kategori', SubKategoriController::class);
     Route::apiResource('transaction', TransactionController::class);

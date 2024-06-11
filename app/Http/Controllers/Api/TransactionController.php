@@ -7,6 +7,7 @@ use App\Models\Transaction;
 use App\Traits\ApiResponder;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class TransactionController extends Controller
@@ -164,6 +165,89 @@ class TransactionController extends Controller
             }
 
             return $this->successResponse($result, 'Data transaksi bar chart telah berhasil diambil.');
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, 'Terjadi kesalahan dalam pengambilan data: ' . $e->getMessage(), 500);
+        }
+    }
+
+    public function multipleChart(Request $request)
+    {
+        $bulan = $request->input('bulan');
+        $tahun = $request->input('tahun');
+
+        if (!$bulan || !$tahun) {
+            return $this->errorResponse(null, 'Data transaksi multiple chart tidak valid.', 422);
+        }
+
+        try {
+            $transactions = Transaction::whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->where('user_id', auth()->id())
+                ->selectRaw('WEEK(tanggal, 1) - WEEK(DATE_SUB(tanggal, INTERVAL DAYOFMONTH(tanggal) - 1 DAY), 1) + 1 as week, SUM(nominal_penjualan) as total_pemasukan, SUM(nominal_pengeluaran) as total_pengeluaran')
+                ->groupBy('week')
+                ->orderBy('week')
+                ->get();
+
+            $data = $transactions->map(function ($item) {
+                $profit = $item->total_pemasukan - $item->total_pengeluaran;
+                return [
+                    'week' => $item->week,
+                    'total_pemasukan' => $item->total_pemasukan,
+                    'total_pengeluaran' => $item->total_pengeluaran,
+                    'profit' => $profit,
+                ];
+            });
+
+            $income = [];
+            $expense = [];
+            $profit = [];
+
+            for ($i = 1; $i <= 4; $i++) {
+                $weekData = $data->firstWhere('week', $i);
+
+                $income[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? $weekData['total_pemasukan'] : 0,
+                ];
+                $expense[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? $weekData['total_pengeluaran'] : 0,
+                ];
+                $profit[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? $weekData['profit'] : 0,
+                ];
+            }
+
+            $result = [
+                'income' => $income,
+                'expense' => $expense,
+                'profit' => $profit,
+            ];
+
+            $performaPenjualan = DB::table('transactions')
+                ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->where('mode', 'Kasir')
+                ->where('user_id', auth()->id())
+                ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
+                ->groupBy('transactions.sub_kategori_id')
+                ->orderByRaw('total_penjualan DESC')
+                ->take(5)
+                ->get();
+
+            $response = [
+                'multiple_chart' => $result,
+                'summary' => [
+                    'pemasukan' => $transactions->sum('total_pemasukan'),
+                    'pengeluaran' => $transactions->sum('total_pengeluaran'),
+                    'keuntungan' => $transactions->sum('total_pemasukan') - $transactions->sum('total_pengeluaran'),
+                ],
+                'performa_penjualan' => $performaPenjualan,
+            ];
+
+            return $this->successResponse($response, 'Data transaksi multiple chart telah berhasil diambil.');
         } catch (\Exception $e) {
             return $this->errorResponse(null, 'Terjadi kesalahan dalam pengambilan data: ' . $e->getMessage(), 500);
         }
