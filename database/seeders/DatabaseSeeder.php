@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Models\Pengaturan;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -33,5 +34,9 @@ class DatabaseSeeder extends Seeder
         foreach ($adminData as $data) {
             User::create($data);
         }
+
+        Pengaturan::create([
+            'key' => 'admin_email',
+        ]);
     }
 }

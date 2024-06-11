@@ -84,11 +84,21 @@ class User extends Authenticatable implements JWTSubject
 
     public function toArray()
     {
-        $array = parent::toArray();
 
-        $array['nama_toko'] = $array['nama_toko'] ?? '';
-        $array['no_handphone'] = $array['no_handphone'] ?? '';
-        $array['alamat'] = $array['alamat'] ?? '';
+        // $pengaturan = Pengaturan::find(1);j
+        $array = [
+            'id' => $this->id,
+            'nama' => $this->nama,
+            'nama_toko' => $this->nama_toko ?? '',
+            'email' => $this->email,
+            'no_handphone' => $this->no_handphone ?? '',
+            'role' => $this->role,
+            'alamat' => $this->alamat ?? '',
+            'image' => $this->image,
+            // 'key' => $pengaturan ? $pengaturan->key : '',
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+        ];
 
         return $array;
     }

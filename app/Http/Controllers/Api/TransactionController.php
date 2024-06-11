@@ -229,7 +229,7 @@ class TransactionController extends Controller
                 ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
                 ->whereYear('tanggal', $tahun)
                 ->whereMonth('tanggal', $bulan)
-                ->where('mode', 'Kasir')
+                ->where('tipe', 'Pemasukan')
                 ->where('user_id', auth()->id())
                 ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
                 ->groupBy('transactions.sub_kategori_id')
