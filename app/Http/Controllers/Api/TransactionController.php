@@ -60,6 +60,44 @@ class TransactionController extends Controller
         return $this->successResponse($transaksi, 'Transaksi telah berhasil ditambahkan.');
     }
 
+    public function storeKasir(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'tanggal' => 'required|date',
+            'pembayaran' => 'required',
+            'catatan' => 'nullable',
+            'items' => 'required|array',
+            'items.*.nominal_penjualan' => 'required|numeric',
+            'items.*.qty' => 'nullable',
+            'items.*.sub_kategori_id' => 'required|exists:sub_kategoris,id',
+        ]);
+
+        if ($validator->fails()) {
+            return $this->errorResponse($validator->errors(), 'Data tidak valid.', 422);
+        }
+
+        $items = $request->input('items');
+
+        $dataToInsert = [];
+        foreach ($items as $item) {
+            $dataToInsert[] = [
+                'tanggal' => $request->input('tanggal'),
+                'type' => 'Pemasukan',
+                'mode' => 'Kasir',
+                'pembayaran' => $request->input('pembayaran'),
+                'catatan' => $request->input('catatan'),
+                'nominal_penjualan' => $item['nominal_penjualan'],
+                'qty' => $item['qty'],
+                'sub_kategori_id' => $item['sub_kategori_id'],
+                'user_id' => auth()->user()->id
+            ];
+        }
+
+        DB::table('transactions')->insert($dataToInsert);
+
+        return $this->successResponse(null, 'Transaksi kasir telah ditambahkan.');
+    }
+
     private function getValidationRules($type, $mode)
     {
         $commonRules = [
@@ -69,6 +107,7 @@ class TransactionController extends Controller
             'mode' => 'required|in:Normal,Kasir',
             'catatan' => 'nullable',
             'pembayaran' => 'required',
+
         ];
 
         $specificRules = [];
@@ -84,12 +123,6 @@ class TransactionController extends Controller
                 'nominal_penjualan' => 'nullable',
                 'nominal_pengeluaran' => 'required|numeric',
                 'qty' => 'nullable',
-            ];
-        } elseif ($type == 'Pemasukan' && $mode == 'Kasir') {
-            $specificRules = [
-                'nominal_penjualan' => 'required|numeric',
-                'nominal_pengeluaran' => 'nullable',
-                'qty' => 'required|numeric',
             ];
         }
 
