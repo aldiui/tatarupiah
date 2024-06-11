@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use App\Models\Kategori;
+use App\Models\Pengaturan;
 use App\Models\Transaction;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -85,7 +86,7 @@ class User extends Authenticatable implements JWTSubject
     public function toArray()
     {
 
-        // $pengaturan = Pengaturan::find(1);j
+        $pengaturan = Pengaturan::find(1);
         $array = [
             'id' => $this->id,
             'nama' => $this->nama,
@@ -95,7 +96,7 @@ class User extends Authenticatable implements JWTSubject
             'role' => $this->role,
             'alamat' => $this->alamat ?? '',
             'image' => $this->image,
-            // 'key' => $pengaturan ? $pengaturan->key : '',
+            'key' => $pengaturan ? $pengaturan->key : '',
             'created_at' => $this->created_at,
             'updated_at' => $this->updated_at,
         ];

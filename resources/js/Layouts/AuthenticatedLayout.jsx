@@ -21,6 +21,11 @@ export default function Authenticated({ user, header, children, sessions }) {
             href: route("user.index"),
             current: route().current("user.*"),
         },
+        {
+            name: "Pengaturan",
+            href: route("pengaturan"),
+            current: route().current("pengaturan"),
+        },
     ];
 
     const [sessionSuccess, setSessionSuccess] = useState(null);

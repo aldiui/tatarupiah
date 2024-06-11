@@ -6,7 +6,7 @@ import TextArea from "@/Components/TextArea";
 import TextInput from "@/Components/TextInput";
 import { useForm } from "@inertiajs/react";
 
-export default function UpdateDataForm({ user }) {
+export default function UpdateUser({ user }) {
     const { data, setData, patch, errors, processing } = useForm({
         nama: user.nama,
         nama_toko: user.nama_toko,
@@ -83,7 +83,7 @@ export default function UpdateDataForm({ user }) {
 
                         <TextInput
                             id="no_handphone"
-                            type="text"
+                            type="number"
                             className="mt-1 block w-full"
                             value={data.no_handphone}
                             onChange={(e) =>
