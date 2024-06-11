@@ -1,7 +1,6 @@
 import InputError from "@/Components/InputError";
 import InputLabel from "@/Components/InputLabel";
 import PrimaryButton from "@/Components/PrimaryButton";
-import SelectBox from "@/Components/SelectBox";
 import TextArea from "@/Components/TextArea";
 import TextInput from "@/Components/TextInput";
 import { useForm } from "@inertiajs/react";
