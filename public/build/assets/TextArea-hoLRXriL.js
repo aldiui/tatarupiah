@@ -1,1 +1,0 @@
-import{r,j as f}from"./app-CtcLAabI.js";const i=r.forwardRef(function({type:s="text",className:o="",isFocused:a=!1,...n},e){const t=e||r.useRef();return r.useEffect(()=>{a&&t.current.focus()},[]),f.jsx("textarea",{...n,type:s,className:"border-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm "+o,ref:t})});export{i as T};
