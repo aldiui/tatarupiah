@@ -110,12 +110,12 @@ class TransactionController extends Controller
 
         $specificRules = [];
 
-        if ($type == 'Pemasukan' && $mode == 'Normal') {
+        if ($type == 'Pemasukan') {
             $specificRules = [
                 'nominal_penjualan' => 'required|numeric',
                 'nominal_pengeluaran' => 'required|numeric',
             ];
-        } elseif ($type == 'Pengeluaran' && $mode == 'Normal') {
+        } elseif ($type == 'Pengeluaran') {
             $specificRules = [
                 'nominal_penjualan' => 'nullable',
                 'nominal_pengeluaran' => 'required|numeric',
