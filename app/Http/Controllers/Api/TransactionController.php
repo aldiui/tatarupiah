@@ -48,10 +48,10 @@ class TransactionController extends Controller
             'user_id' => $user->id,
             'sub_kategori_id' => $request->sub_kategori_id,
             'type' => $request->type,
-            'mode' => $request->mode,
+            'mode' => "Normal",
             'nominal_penjualan' => $request->nominal_penjualan ?? 0,
             'nominal_pengeluaran' => $request->nominal_pengeluaran ?? 0,
-            'qty' => $request->qty ?? 0,
+            'qty' => 0,
             'catatan' => $request->catatan,
             'tanggal' => $request->tanggal,
             'pembayaran' => $request->pembayaran,
@@ -89,7 +89,7 @@ class TransactionController extends Controller
                 'nominal_penjualan' => $item['nominal_penjualan'],
                 'qty' => $item['qty'],
                 'sub_kategori_id' => $item['sub_kategori_id'],
-                'user_id' => auth()->user()->id
+                'user_id' => auth()->user()->id,
             ];
         }
 
@@ -104,10 +104,8 @@ class TransactionController extends Controller
             'tanggal' => 'required|date',
             'sub_kategori_id' => 'required|exists:sub_kategoris,id',
             'type' => 'required|in:Pemasukan,Pengeluaran',
-            'mode' => 'required|in:Normal,Kasir',
             'catatan' => 'nullable',
             'pembayaran' => 'required',
-
         ];
 
         $specificRules = [];
@@ -116,13 +114,11 @@ class TransactionController extends Controller
             $specificRules = [
                 'nominal_penjualan' => 'required|numeric',
                 'nominal_pengeluaran' => 'required|numeric',
-                'qty' => 'nullable',
             ];
         } elseif ($type == 'Pengeluaran' && $mode == 'Normal') {
             $specificRules = [
                 'nominal_penjualan' => 'nullable',
                 'nominal_pengeluaran' => 'required|numeric',
-                'qty' => 'nullable',
             ];
         }
 
