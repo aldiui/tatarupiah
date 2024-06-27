@@ -30,7 +30,7 @@ class Transaction extends Model
     {
         $array = [
             'id' => $this->id,
-            'sub_kategori_id' => $this->subKategori_id,
+            'sub_kategori_id' => $this->sub_kategori_id,
             'sub_kategori' => $this->subKategori->nama,
             'kategori' => $this->subKategori->kategori->nama,
             'icon' => $this->subKategori->icon,
