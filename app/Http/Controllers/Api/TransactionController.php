@@ -260,12 +260,12 @@ class TransactionController extends Controller
 
             $performaPenjualan = DB::table('transactions')
                 ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
+                ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
                 ->whereYear('tanggal', $tahun)
                 ->whereMonth('tanggal', $bulan)
                 ->where('type', 'Pemasukan')
                 ->where('user_id', auth()->id())
-                ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
-                ->groupBy('transactions.sub_kategori_id')
+                ->groupBy('sub_kategoris.nama', 'transactions.sub_kategori_id')
                 ->orderByRaw('total_penjualan DESC')
                 ->take(5)
                 ->get();
