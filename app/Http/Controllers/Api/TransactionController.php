@@ -59,7 +59,6 @@ class TransactionController extends Controller
 
         return $this->successResponse($transaksi, 'Transaksi telah berhasil ditambahkan.');
     }
-
     public function storeKasir(Request $request)
     {
         $validator = Validator::make($request->all(), [
@@ -78,24 +77,29 @@ class TransactionController extends Controller
 
         $items = $request->input('items');
 
-        $dataToInsert = [];
-        foreach ($items as $item) {
-            $dataToInsert[] = [
-                'tanggal' => $request->input('tanggal'),
-                'type' => 'Pemasukan',
-                'mode' => 'Kasir',
-                'pembayaran' => $request->input('pembayaran'),
-                'catatan' => $request->input('catatan'),
-                'nominal_penjualan' => $item['nominal_penjualan'],
-                'qty' => $item['qty'],
-                'sub_kategori_id' => $item['sub_kategori_id'],
-                'user_id' => auth()->user()->id,
-            ];
-        }
+        $insertedIds = [];
 
-        $transactions = Transaction::insert($dataToInsert);
+        DB::transaction(function () use ($request, $items, &$insertedIds) {
+            foreach ($items as $item) {
+                $insertedIds[] = Transaction::insertGetId([
+                    'tanggal' => $request->input('tanggal'),
+                    'type' => 'Pemasukan',
+                    'mode' => 'Kasir',
+                    'pembayaran' => $request->input('pembayaran'),
+                    'catatan' => $request->input('catatan'),
+                    'nominal_penjualan' => $item['nominal_penjualan'],
+                    'qty' => $item['qty'],
+                    'sub_kategori_id' => $item['sub_kategori_id'],
+                    'user_id' => auth()->user()->id,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            }
+        });
 
-        return $this->successResponse($transactions, 'Transaksi kasir telah ditambahkan.');
+        $insertedTransactions = Transaction::whereIn('id', $insertedIds)->get();
+
+        return $this->successResponse($insertedTransactions, 'Transaksi kasir telah ditambahkan.');
     }
 
     private function getValidationRules($type, $mode)
