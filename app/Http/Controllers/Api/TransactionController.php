@@ -272,7 +272,7 @@ class TransactionController extends Controller
             $response = [
                 'multiple_chart' => $result,
                 'summary' => [
-                    'pemasukan' => $transactions->sum('total_pemasukan'),
+                    'pemasukan' => $ransactions->sum('total_pemasukan'),
                     'pengeluaran' => $transactions->sum('total_pengeluaran'),
                     'keuntungan' => $transactions->sum('total_pemasukan') - $transactions->sum('total_pengeluaran'),
                 ],
