@@ -93,9 +93,9 @@ class TransactionController extends Controller
             ];
         }
 
-        DB::table('transactions')->insert($dataToInsert);
+        $transactions = Transaction::insert($dataToInsert);
 
-        return $this->successResponse(null, 'Transaksi kasir telah ditambahkan.');
+        return $this->successResponse($transactions, 'Transaksi kasir telah ditambahkan.');
     }
 
     private function getValidationRules($type, $mode)
