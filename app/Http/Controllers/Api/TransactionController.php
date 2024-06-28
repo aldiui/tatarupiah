@@ -257,8 +257,9 @@ class TransactionController extends Controller
                 'expense' => $expense,
                 'profit' => $profit,
             ];
+
             $performaPenjualan = DB::table('transactions')
-                ->selectRaw('sub_kategoris.nama as category, CAST(SUM(transactions.nominal_penjualan) AS UNSIGNED) as total_penjualan')
+                ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
                 ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
                 ->whereYear('tanggal', $tahun)
                 ->whereMonth('tanggal', $bulan)
@@ -272,7 +273,7 @@ class TransactionController extends Controller
             $response = [
                 'multiple_chart' => $result,
                 'summary' => [
-                    'pemasukan' => $ransactions->sum('total_pemasukan'),
+                    'pemasukan' => $transactions->sum('total_pemasukan'),
                     'pengeluaran' => $transactions->sum('total_pengeluaran'),
                     'keuntungan' => $transactions->sum('total_pemasukan') - $transactions->sum('total_pengeluaran'),
                 ],
