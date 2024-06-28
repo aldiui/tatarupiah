@@ -37,7 +37,7 @@ class Transaction extends Model
             'tanggal' => $this->tanggal,
             'type' => $this->type,
             'mode' => $this->mode,
-            'qty' => $this->qty,
+            'qty' => (int) $this->qty,
             'nominal_penjualan' => (int) $this->nominal_penjualan,
             'nominal_pengeluaran' => (int) $this->nominal_pengeluaran,
             'catatan' => $this->catatan,
