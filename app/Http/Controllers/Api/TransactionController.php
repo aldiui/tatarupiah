@@ -258,8 +258,7 @@ class TransactionController extends Controller
                 'profit' => $profit,
             ];
 
-            $performaPenjualan = DB::table('transactions')
-                ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
+            $performaPenjualan = Transaction::selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
                 ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
                 ->whereYear('tanggal', $tahun)
                 ->whereMonth('tanggal', $bulan)
