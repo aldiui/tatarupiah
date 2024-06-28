@@ -212,74 +212,78 @@ class TransactionController extends Controller
             return $this->errorResponse(null, 'Data transaksi multiple chart tidak valid.', 422);
         }
 
-        $transactions = Transaction::whereYear('tanggal', $tahun)
-            ->whereMonth('tanggal', $bulan)
-            ->where('user_id', auth()->id())
-            ->selectRaw('WEEK(tanggal, 1) - WEEK(DATE_SUB(tanggal, INTERVAL DAYOFMONTH(tanggal) - 1 DAY), 1) + 1 as week, SUM(nominal_penjualan) as total_pemasukan, SUM(nominal_pengeluaran) as total_pengeluaran')
-            ->groupBy('week')
-            ->orderBy('week')
-            ->get();
+        try {
+            $transactions = Transaction::whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->where('user_id', auth()->id())
+                ->selectRaw('WEEK(tanggal, 1) - WEEK(DATE_SUB(tanggal, INTERVAL DAYOFMONTH(tanggal) - 1 DAY), 1) + 1 as week, SUM(nominal_penjualan) as total_pemasukan, SUM(nominal_pengeluaran) as total_pengeluaran')
+                ->groupBy('week')
+                ->orderBy('week')
+                ->get();
 
-        $data = $transactions->map(function ($item) {
-            $profit = $item->total_pemasukan - $item->total_pengeluaran;
-            return [
-                'week' => $item->week,
-                'total_pemasukan' => $item->total_pemasukan,
-                'total_pengeluaran' => $item->total_pengeluaran,
+            $data = $transactions->map(function ($item) {
+                $profit = $item->total_pemasukan - $item->total_pengeluaran;
+                return [
+                    'week' => $item->week,
+                    'total_pemasukan' => $item->total_pemasukan,
+                    'total_pengeluaran' => $item->total_pengeluaran,
+                    'profit' => $profit,
+                ];
+            });
+
+            $income = [];
+            $expense = [];
+            $profit = [];
+
+            for ($i = 1; $i <= 4; $i++) {
+                $weekData = $data->firstWhere('week', $i);
+
+                $income[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? (int) $weekData['total_pemasukan'] : 0,
+                ];
+                $expense[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? (int) $weekData['total_pengeluaran'] : 0,
+                ];
+                $profit[] = [
+                    'x' => $i - 1,
+                    'y' => $weekData ? (int) $weekData['profit'] : 0,
+                ];
+            }
+
+            $result = [
+                'income' => $income,
+                'expense' => $expense,
                 'profit' => $profit,
             ];
-        });
 
-        $income = [];
-        $expense = [];
-        $profit = [];
+            $performaPenjualan = DB::table('transactions')
+                ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
+                ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
+                ->whereYear('tanggal', $tahun)
+                ->whereMonth('tanggal', $bulan)
+                ->where('type', 'Pemasukan')
+                ->where('user_id', auth()->id())
+                ->groupBy('sub_kategoris.nama', 'transactions.sub_kategori_id')
+                ->orderByRaw('total_penjualan DESC')
+                ->take(5)
+                ->get();
 
-        for ($i = 1; $i <= 4; $i++) {
-            $weekData = $data->firstWhere('week', $i);
+            $response = [
+                'multiple_chart' => $result,
+                'summary' => [
+                    'pemasukan' => $transactions->sum('total_pemasukan'),
+                    'pengeluaran' => $transactions->sum('total_pengeluaran'),
+                    'keuntungan' => $transactions->sum('total_pemasukan') - $transactions->sum('total_pengeluaran'),
+                ],
+                'performa_penjualan' => $performaPenjualan,
+            ];
 
-            $income[] = [
-                'x' => $i - 1,
-                'y' => $weekData ? (int) $weekData['total_pemasukan'] : 0,
-            ];
-            $expense[] = [
-                'x' => $i - 1,
-                'y' => $weekData ? (int) $weekData['total_pengeluaran'] : 0,
-            ];
-            $profit[] = [
-                'x' => $i - 1,
-                'y' => $weekData ? (int) $weekData['profit'] : 0,
-            ];
+            return $this->successResponse($response, 'Data transaksi multiple chart telah berhasil diambil.');
+        } catch (\Exception $e) {
+            return $this->errorResponse(null, 'Terjadi kesalahan dalam pengambilan data: ' . $e->getMessage(), 500);
         }
-
-        $result = [
-            'income' => $income,
-            'expense' => $expense,
-            'profit' => $profit,
-        ];
-
-        // $performaPenjualan = Transaction::selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
-        //     ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
-        //     ->whereYear('tanggal', $tahun)
-        //     ->whereMonth('tanggal', $bulan)
-        //     ->where('type', 'Pemasukan')
-        //     ->where('user_id', auth()->id())
-        //     ->groupBy('sub_kategoris.nama', 'transactions.sub_kategori_id')
-        //     ->orderByRaw('total_penjualan DESC')
-        //     ->take(5)
-        //     ->get();
-
-        $response = [
-            'multiple_chart' => $result,
-            'summary' => [
-                'pemasukan' => $transactions->sum('total_pemasukan'),
-                'pengeluaran' => $transactions->sum('total_pengeluaran'),
-                'keuntungan' => $transactions->sum('total_pemasukan') - $transactions->sum('total_pengeluaran'),
-            ],
-            'performa_penjualan' => $performaPenjualan ?? [],
-        ];
-
-        return $this->successResponse($response, 'Data transaksi multiple chart telah berhasil diambil.');
-
     }
 
 }
