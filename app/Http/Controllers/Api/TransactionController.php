@@ -240,15 +240,15 @@ class TransactionController extends Controller
 
                 $income[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? $weekData['total_pemasukan'] : 0,
+                    'y' => $weekData ? (int) $weekData['total_pemasukan'] : 0,
                 ];
                 $expense[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? $weekData['total_pengeluaran'] : 0,
+                    'y' => $weekData ? (int) $weekData['total_pengeluaran'] : 0,
                 ];
                 $profit[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? $weekData['profit'] : 0,
+                    'y' => $weekData ? (int) $weekData['profit'] : 0,
                 ];
             }
 
@@ -257,9 +257,8 @@ class TransactionController extends Controller
                 'expense' => $expense,
                 'profit' => $profit,
             ];
-
             $performaPenjualan = DB::table('transactions')
-                ->selectRaw('sub_kategoris.nama as category, SUM(transactions.nominal_penjualan) as total_penjualan')
+                ->selectRaw('sub_kategoris.nama as category, CAST(SUM(transactions.nominal_penjualan) AS UNSIGNED) as total_penjualan')
                 ->join('sub_kategoris', 'transactions.sub_kategori_id', '=', 'sub_kategoris.id')
                 ->whereYear('tanggal', $tahun)
                 ->whereMonth('tanggal', $bulan)
