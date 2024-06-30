@@ -223,34 +223,44 @@ class TransactionController extends Controller
                 ->orderBy('week')
                 ->get();
 
-            $data = $transactions->map(function ($item) {
-                $profit = $item->total_pemasukan - $item->total_pengeluaran;
-                return [
-                    'week' => $item->week,
-                    'total_pemasukan' => $item->total_pemasukan,
-                    'total_pengeluaran' => $item->total_pengeluaran,
-                    'profit' => $profit,
+            $data = [];
+            $weeksInMonth = 4;
+
+            for ($i = 1; $i <= $weeksInMonth; $i++) {
+                $data[$i] = [
+                    'week' => $i,
+                    'total_pemasukan' => 0,
+                    'total_pengeluaran' => 0,
+                    'profit' => 0,
                 ];
-            });
+            }
+
+            foreach ($transactions as $transaction) {
+                $week = $transaction->week;
+                $data[$week] = [
+                    'week' => $week,
+                    'total_pemasukan' => $transaction->total_pemasukan,
+                    'total_pengeluaran' => $transaction->total_pengeluaran,
+                    'profit' => $transaction->total_pemasukan - $transaction->total_pengeluaran,
+                ];
+            }
 
             $income = [];
             $expense = [];
-            $profit = [];
+            $profitData = [];
 
-            for ($i = 1; $i <= 4; $i++) {
-                $weekData = $data->firstWhere('week', $i);
-
+            for ($i = 1; $i <= $weeksInMonth; $i++) {
                 $income[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? (int) $weekData['total_pemasukan'] : 0,
+                    'y' => (int) $data[$i]['total_pemasukan'],
                 ];
                 $expense[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? (int) $weekData['total_pengeluaran'] : 0,
+                    'y' => (int) $data[$i]['total_pengeluaran'],
                 ];
-                $profit[] = [
+                $profitData[] = [
                     'x' => $i - 1,
-                    'y' => $weekData ? (int) $weekData['profit'] : 0,
+                    'y' => (int) $data[$i]['profit'],
                 ];
             }
 
