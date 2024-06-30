@@ -237,9 +237,9 @@ class TransactionController extends Controller
                 $week = $transaction->week;
                 $data[$week] = [
                     'week' => $week,
-                    'total_pemasukan' => $transaction->total_pemasukan,
-                    'total_pengeluaran' => $transaction->total_pengeluaran,
-                    'profit' => $transaction->total_pemasukan - $transaction->total_pengeluaran,
+                    'total_pemasukan' => (int) ($transaction->total_pemasukan ?? 0),
+                    'total_pengeluaran' => (int) ($transaction->total_pengeluaran ?? 0),
+                    'profit' => (int) ($transaction->total_pemasukan - $transaction->total_pengeluaran),
                 ];
             }
 
@@ -265,7 +265,7 @@ class TransactionController extends Controller
             $result = [
                 'income' => $income,
                 'expense' => $expense,
-                'profit' => $profit,
+                'profit' => $profitData,
             ];
 
             $performaPenjualan = DB::table('transactions')
