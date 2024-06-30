@@ -27,7 +27,7 @@ class TransactionController extends Controller
             }
         }
 
-        $transactions = $userTransactions->paginate(15);
+        $transactions = $userTransactions->latest()->paginate(15);
         return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
     }
 
