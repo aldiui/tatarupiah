@@ -21,15 +21,13 @@ class TransactionController extends Controller
 
         if ($request->has(['tanggal_mulai', 'tanggal_selesai'])) {
             if ($request->has('tanggal_mulai') && $request->has('tanggal_selesai')) {
-                $transactions = $userTransactions->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai])->get();
+                $userTransactions = $userTransactions->whereBetween('tanggal', [$request->tanggal_mulai, $request->tanggal_selesai]);
             } elseif ($request->has('tanggal_mulai')) {
-                $transactions = $userTransactions->where('tanggal', $request->tanggal_mulai)->get();
+                $userTransactions = $userTransactions->where('tanggal', $request->tanggal_mulai);
             }
-
-            return $this->successResponse($transactions ?? null, 'Transaksi berhasil diambil.');
         }
 
-        $transactions = Transaction::where('user_id', auth()->user()->id)->get();
+        $transactions = $userTransactions->paginate(15);
         return $this->successResponse($transactions, 'Transaksi berhasil diambil.');
     }
 
