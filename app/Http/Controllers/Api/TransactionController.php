@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Models\SubKategori;
 use App\Models\Transaction;
 use App\Traits\ApiResponder;
 use Carbon\Carbon;
@@ -66,7 +67,6 @@ class TransactionController extends Controller
             'pembayaran' => 'required',
             'catatan' => 'nullable',
             'items' => 'required|array',
-            'items.*.nominal_penjualan' => 'required|numeric',
             'items.*.qty' => 'nullable',
             'items.*.sub_kategori_id' => 'required|exists:sub_kategoris,id',
         ]);
@@ -81,13 +81,15 @@ class TransactionController extends Controller
 
         DB::transaction(function () use ($request, $items, &$insertedIds) {
             foreach ($items as $item) {
+                $getSubKategori = SubKategori::find($item['sub_kategori_id']);
                 $insertedIds[] = Transaction::insertGetId([
                     'tanggal' => $request->input('tanggal'),
                     'type' => 'Pemasukan',
                     'mode' => 'Kasir',
                     'pembayaran' => $request->input('pembayaran'),
                     'catatan' => $request->input('catatan'),
-                    'nominal_penjualan' => $item['nominal_penjualan'],
+                    'nominal_penjualan' => $getSubKategori->nominal_penjualan * $item['qty'],
+                    'nominal_pengeluaran' => $getSubKategori->nominal_pengeluaran * $item['qty'],
                     'qty' => $item['qty'],
                     'sub_kategori_id' => $item['sub_kategori_id'],
                     'user_id' => auth()->user()->id,
