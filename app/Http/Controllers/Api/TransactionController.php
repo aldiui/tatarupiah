@@ -224,15 +224,6 @@ class TransactionController extends Controller
             $data = [];
             $weeksInMonth = 4;
 
-            for ($i = 1; $i <= $weeksInMonth; $i++) {
-                $data[$i] = [
-                    'week' => $i,
-                    'total_pemasukan' => 0,
-                    'total_pengeluaran' => 0,
-                    'profit' => 0,
-                ];
-            }
-
             foreach ($transactions as $transaction) {
                 $week = $transaction->week;
                 $data[$week] = [
@@ -243,22 +234,36 @@ class TransactionController extends Controller
                 ];
             }
 
+            // Fill in missing weeks with default values
+            for ($i = 1; $i <= $weeksInMonth; $i++) {
+                if (!isset($data[$i])) {
+                    $data[$i] = [
+                        'week' => $i,
+                        'total_pemasukan' => 0,
+                        'total_pengeluaran' => 0,
+                        'profit' => 0,
+                    ];
+                }
+            }
+
+            ksort($data); // Sort the data by week
+
             $income = [];
             $expense = [];
             $profitData = [];
 
-            for ($i = 1; $i <= $weeksInMonth; $i++) {
+            foreach ($data as $weekData) {
                 $income[] = [
-                    'x' => $i - 1,
-                    'y' => (int) $data[$i]['total_pemasukan'],
+                    'x' => $weekData['week'] - 1,
+                    'y' => $weekData['total_pemasukan'],
                 ];
                 $expense[] = [
-                    'x' => $i - 1,
-                    'y' => (int) $data[$i]['total_pengeluaran'],
+                    'x' => $weekData['week'] - 1,
+                    'y' => $weekData['total_pengeluaran'],
                 ];
                 $profitData[] = [
-                    'x' => $i - 1,
-                    'y' => (int) $data[$i]['profit'],
+                    'x' => $weekData['week'] - 1,
+                    'y' => $weekData['profit'],
                 ];
             }
 
