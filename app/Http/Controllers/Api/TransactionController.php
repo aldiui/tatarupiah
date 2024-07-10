@@ -166,6 +166,7 @@ class TransactionController extends Controller
             $startDate = $endDate->copy()->subDays(6);
 
             $transactions = Transaction::whereBetween('tanggal', [$startDate, $endDate])
+                ->where('user_id', auth()->id())
                 ->selectRaw('DATE(tanggal) as date, SUM(nominal_penjualan) as total_pemasukan, SUM(nominal_pengeluaran) as total_pengeluaran')
                 ->groupBy('date')
                 ->orderBy('date')
@@ -234,7 +235,6 @@ class TransactionController extends Controller
                 ];
             }
 
-            // Fill in missing weeks with default values
             for ($i = 1; $i <= $weeksInMonth; $i++) {
                 if (!isset($data[$i])) {
                     $data[$i] = [
