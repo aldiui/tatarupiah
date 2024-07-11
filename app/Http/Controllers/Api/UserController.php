@@ -18,10 +18,10 @@ class UserController extends Controller
         if ($request->isMethod('put')) {
             $validator = Validator::make($request->all(), [
                 'nama' => 'required',
-                'nama_toko' => 'required',
+                'nama_toko' => 'nullable',
                 'no_handphone' => 'required|string|unique:users,no_handphone,' . $user->id,
                 'email' => 'required|email|unique:users,email,' . $user->id,
-                'alamat' => 'required',
+                'alamat' => 'nullable',
             ]);
 
             if ($validator->fails()) {
